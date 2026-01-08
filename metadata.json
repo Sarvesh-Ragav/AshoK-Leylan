@@ -1,0 +1,5 @@
+{
+  "name": "Manufacturing Production Demo",
+  "description": "A simplified production tracking application designed for users with low computer literacy, featuring guided step-by-step entries, supervisor reviews, and performance reports.",
+  "requestFramePermissions": []
+}
