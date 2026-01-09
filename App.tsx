@@ -37,41 +37,53 @@ const Header: React.FC = () => {
 
   if (location.pathname === '/') return null;
 
+  const isAdmin = state.role === 'Admin';
+  const isSupervisor = state.role === 'Supervisor';
+  const isEmployee = state.role === 'Employee';
+
   return (
-    <header className="bg-slate-900 text-white shadow-sm sticky top-0 z-50 h-10 border-b border-slate-700 flex items-center px-3">
-      <div className="flex-1 flex items-center gap-3">
-        <div className="text-[12px] font-bold tracking-tight uppercase border-r border-slate-700 pr-3">
-          MES Console
-        </div>
-        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hidden sm:block">
-          PRD-NODE-04
+    <header className="bg-slate-900 text-white shadow-lg sticky top-0 z-50 h-12 border-b border-slate-700 flex items-center px-4">
+      <div className="flex-1 flex items-center gap-4">
+        <Link to="/" className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center font-black text-sm">AL</Link>
+        <div className="flex flex-col">
+          <div className="text-[11px] font-black tracking-tight uppercase leading-none">
+            MES Terminal
+          </div>
+          <div className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mt-1">
+            Factory Node: {state.role?.toUpperCase()}
+          </div>
         </div>
       </div>
       
-      <nav className="flex items-center gap-3">
-        <div className="text-right mr-1 hidden md:block">
-          <p className="font-bold text-[11px] text-blue-400 uppercase leading-none">{state.role}</p>
-        </div>
-        
-        <div className="flex gap-1">
-          {state.role === 'Admin' && (
+      <nav className="flex items-center gap-4">
+        <div className="flex gap-2">
+          {/* Universal Production Entry for all roles */}
+          <Link to="/entry" className={`px-3 py-1.5 font-black text-[9px] uppercase transition rounded-lg border ${location.pathname === '/entry' ? 'bg-white text-slate-900 border-white' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'}`}>Production Entry</Link>
+          
+          {(isSupervisor || isAdmin) && (
+            <Link to="/supervisor" className={`px-3 py-1.5 font-black text-[9px] uppercase transition rounded-lg border ${location.pathname === '/supervisor' ? 'bg-white text-slate-900 border-white' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'}`}>Review Queue</Link>
+          )}
+
+          {isAdmin && (
             <>
-              <Link to="/reports" className="bg-slate-800 hover:bg-slate-700 px-2 py-1 border border-slate-600 font-bold text-[10px] uppercase transition rounded-sm">BI Reports</Link>
-              <Link to="/upload" className="bg-slate-800 hover:bg-slate-700 px-2 py-1 border border-slate-600 font-bold text-[10px] uppercase transition rounded-sm">Import</Link>
+              <Link to="/reports" className={`px-3 py-1.5 font-black text-[9px] uppercase transition rounded-lg border ${location.pathname === '/reports' ? 'bg-white text-slate-900 border-white' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'}`}>BI Reports</Link>
+              <Link to="/upload" className={`px-3 py-1.5 font-black text-[9px] uppercase transition rounded-lg border ${location.pathname === '/upload' ? 'bg-white text-slate-900 border-white' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'}`}>Import</Link>
             </>
           )}
-          {state.role === 'Supervisor' && (
-            <Link to="/supervisor" className="bg-slate-800 hover:bg-slate-700 px-2 py-1 border border-slate-600 font-bold text-[10px] uppercase transition rounded-sm">Review Queue</Link>
-          )}
+        </div>
+
+        <div className="h-6 w-px bg-slate-700 mx-2"></div>
+
+        <div className="flex gap-2">
           <button 
             onClick={resetDemo}
-            className="bg-red-950/40 text-red-300 hover:bg-red-900/50 px-2 py-1 border border-red-900 font-bold text-[10px] uppercase transition rounded-sm"
+            className="text-red-400 hover:bg-red-950/30 px-3 py-1.5 font-black text-[9px] uppercase transition rounded-lg border border-transparent"
           >
             Reset
           </button>
           <button 
             onClick={handleLogout}
-            className="bg-white text-slate-900 hover:bg-slate-100 px-2 py-1 font-bold text-[10px] uppercase transition border border-slate-200 rounded-sm"
+            className="bg-slate-800 text-white hover:bg-slate-700 px-4 py-1.5 font-black text-[9px] uppercase transition border border-slate-600 rounded-lg shadow-sm"
           >
             Logoff
           </button>
