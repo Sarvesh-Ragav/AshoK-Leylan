@@ -124,8 +124,8 @@ const Reports: React.FC = () => {
           </div>
           <div className="mb-12">
             <h3 className="text-[11px] font-black text-slate-900 uppercase mb-4 border-l-4 border-slate-900 pl-3">Performance Trends</h3>
-            <div className="h-[280px] w-full border border-slate-100 p-2 rounded">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[280px] w-full border border-slate-100 p-2 rounded relative">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="label" tick={{ fontSize: 9, fontWeight: 800, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} />
@@ -202,10 +202,10 @@ const Reports: React.FC = () => {
           <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-tighter">Waste Index: {((kpis.totalRejected / kpis.totalActual) * 100 || 0).toFixed(1)}%</p>
         </div>
       </div>
-      <div className="bg-white p-6 border border-slate-200 rounded-2xl shadow-sm flex-1">
+      <div className="bg-white p-6 border border-slate-200 rounded-2xl shadow-sm flex-1 relative min-h-[300px]">
         <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-6 border-b pb-2">Production Variance Trend</h3>
-        <div className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-[300px] w-full relative">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
               <XAxis dataKey="label" tick={{ fontSize: 10, fontWeight: 800, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} />
