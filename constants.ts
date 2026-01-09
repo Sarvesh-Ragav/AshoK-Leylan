@@ -1,4 +1,6 @@
 
+import { ProductionEntry } from './types';
+
 export const SHOPS = ['Shop 1', 'Shop 2'];
 export const SHIFTS = ['Shift 1', 'Shift 2', 'Shift 3'];
 
@@ -19,7 +21,7 @@ export const MACHINE_PARTS: Record<string, string[]> = {
  * ENTERPRISE BASELINE DATASET
  * Expanded to cover multiple months and years for report demonstration.
  */
-export const INITIAL_DUMMY_DATA: any[] = [
+export const INITIAL_DUMMY_DATA: ProductionEntry[] = [
   // 2024 Data (Current Year)
   { id: 'd1', date: '10/05/2024', shop: 'Shop 1', shift: 'Shift 1', machine: 'MCH-01', part: 'PRT-101', plannedQty: 100, actualQty: 98, rejectedQty: 1, status: 'Approved' },
   { id: 'd2', date: '15/05/2024', shop: 'Shop 1', shift: 'Shift 2', machine: 'MCH-02', part: 'PRT-201', plannedQty: 150, actualQty: 145, rejectedQty: 3, status: 'Approved' },

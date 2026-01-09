@@ -58,13 +58,13 @@ const ExcelUpload: React.FC = () => {
       const newEntry: ProductionEntry = {
         id: Math.random().toString(36).substring(7),
         date: new Date().toLocaleDateString(),
-        shop: findVal(['shop', 'area']) || 'EXT-AUDIT',
-        shift: findVal(['shift', 'time']) || 'EXT-SHIFT',
-        machine: findVal(['machine', 'mch', 'equipment']) || 'MCH-EXT',
-        part: findVal(['part', 'comp', 'item']) || 'PRT-EXT',
-        plannedQty: parseInt(findVal(['planned', 'target', 'goal']) || 0),
-        actualQty: parseInt(findVal(['actual', 'produced', 'total']) || 0),
-        rejectedQty: parseInt(findVal(['rejected', 'scrap', 'defect']) || 0),
+        shop: String(findVal(['shop', 'area']) || 'EXT-AUDIT'),
+        shift: String(findVal(['shift', 'time']) || 'EXT-SHIFT'),
+        machine: String(findVal(['machine', 'mch', 'equipment']) || 'MCH-EXT'),
+        part: String(findVal(['part', 'comp', 'item']) || 'PRT-EXT'),
+        plannedQty: parseInt(String(findVal(['planned', 'target', 'goal']) || '0'), 10),
+        actualQty: parseInt(String(findVal(['actual', 'produced', 'total']) || '0'), 10),
+        rejectedQty: parseInt(String(findVal(['rejected', 'scrap', 'defect']) || '0'), 10),
         status: 'Approved'
       };
       addEntry(newEntry);

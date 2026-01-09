@@ -39,7 +39,6 @@ const Header: React.FC = () => {
 
   const isAdmin = state.role === 'Admin';
   const isSupervisor = state.role === 'Supervisor';
-  const isEmployee = state.role === 'Employee';
 
   return (
     <header className="bg-slate-900 text-white shadow-lg sticky top-0 z-50 h-12 border-b border-slate-700 flex items-center px-4">
@@ -50,23 +49,22 @@ const Header: React.FC = () => {
             MES Terminal
           </div>
           <div className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mt-1">
-            Factory Node: {state.role?.toUpperCase()}
+            Node: {state.role?.toUpperCase()}
           </div>
         </div>
       </div>
       
       <nav className="flex items-center gap-4">
         <div className="flex gap-2">
-          {/* Universal Production Entry for all roles */}
-          <Link to="/entry" className={`px-3 py-1.5 font-black text-[9px] uppercase transition rounded-lg border ${location.pathname === '/entry' ? 'bg-white text-slate-900 border-white' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'}`}>Production Entry</Link>
+          <Link to="/entry" className={`px-3 py-1.5 font-black text-[9px] uppercase transition rounded-lg border ${location.pathname === '/entry' ? 'bg-white text-slate-900 border-white' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'}`}>Entry</Link>
           
           {(isSupervisor || isAdmin) && (
-            <Link to="/supervisor" className={`px-3 py-1.5 font-black text-[9px] uppercase transition rounded-lg border ${location.pathname === '/supervisor' ? 'bg-white text-slate-900 border-white' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'}`}>Review Queue</Link>
+            <Link to="/supervisor" className={`px-3 py-1.5 font-black text-[9px] uppercase transition rounded-lg border ${location.pathname === '/supervisor' ? 'bg-white text-slate-900 border-white' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'}`}>Review</Link>
           )}
 
           {isAdmin && (
             <>
-              <Link to="/reports" className={`px-3 py-1.5 font-black text-[9px] uppercase transition rounded-lg border ${location.pathname === '/reports' ? 'bg-white text-slate-900 border-white' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'}`}>BI Reports</Link>
+              <Link to="/reports" className={`px-3 py-1.5 font-black text-[9px] uppercase transition rounded-lg border ${location.pathname === '/reports' ? 'bg-white text-slate-900 border-white' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'}`}>Reports</Link>
               <Link to="/upload" className={`px-3 py-1.5 font-black text-[9px] uppercase transition rounded-lg border ${location.pathname === '/upload' ? 'bg-white text-slate-900 border-white' : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'}`}>Import</Link>
             </>
           )}
@@ -95,8 +93,13 @@ const Header: React.FC = () => {
 
 const App: React.FC = () => {
   const [state, setState] = useState<AppState>(() => {
-    const saved = localStorage.getItem('demo_state_registry');
-    return saved ? JSON.parse(saved) : { role: null, entries: INITIAL_DUMMY_DATA };
+    try {
+      const saved = localStorage.getItem('demo_state_registry');
+      return saved ? JSON.parse(saved) : { role: null, entries: INITIAL_DUMMY_DATA };
+    } catch (e) {
+      console.error("Failed to load state", e);
+      return { role: null, entries: INITIAL_DUMMY_DATA };
+    }
   });
 
   useEffect(() => {
@@ -119,9 +122,9 @@ const App: React.FC = () => {
 
   return (
     <AppContext.Provider value={{ state, setRole, addEntry, updateEntry, resetDemo }}>
-      <div className="min-h-screen flex flex-col font-sans text-slate-800 bg-[#fbfcfd] selection:bg-blue-900 selection:text-white text-[12px]">
+      <div className="min-h-screen flex flex-col font-sans text-slate-800 bg-[#fbfcfd]">
         <Header />
-        <main className="flex-1 flex flex-col p-2 md:p-3 w-full">
+        <main className="flex-1 flex flex-col w-full">
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/entry" element={<EmployeeEntry />} />

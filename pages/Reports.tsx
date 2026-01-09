@@ -2,30 +2,22 @@
 import React, { useMemo, useState } from 'react';
 import { useAppState } from '../App';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { SHIFTS } from '../constants';
 
 type TimeMode = 'Weekly' | 'Monthly' | 'Yearly';
 
 const Reports: React.FC = () => {
   const { state } = useAppState();
   const [timeMode, setTimeMode] = useState<TimeMode>('Monthly');
-  const [selectedShift, setSelectedShift] = useState<string>('All');
   const [showPrintPreview, setShowPrintPreview] = useState(false);
 
   const approvedEntries = useMemo(() => 
     state.entries.filter(e => e.status === 'Approved'), 
   [state.entries]);
 
-  const filteredEntries = useMemo(() => {
-    let list = [...approvedEntries];
-    if (selectedShift !== 'All') {
-      list = list.filter(e => e.shift === selectedShift);
-    }
-    return list;
-  }, [approvedEntries, selectedShift]);
-
   const parseDate = (dateStr: string) => {
-    const [d, m, y] = dateStr.split('/').map(Number);
+    const parts = dateStr.split('/');
+    if (parts.length !== 3) return new Date();
+    const [d, m, y] = parts.map(Number);
     return new Date(y, m - 1, d);
   };
 
@@ -39,7 +31,7 @@ const Reports: React.FC = () => {
 
   const chartData = useMemo(() => {
     const groups: Record<string, { label: string; planned: number; actual: number; timestamp: number }> = {};
-    filteredEntries.forEach(entry => {
+    approvedEntries.forEach(entry => {
       const d = parseDate(entry.date);
       let key = "";
       let label = "";
@@ -62,16 +54,16 @@ const Reports: React.FC = () => {
       groups[key].actual += entry.actualQty;
     });
     return Object.values(groups).sort((a, b) => a.timestamp - b.timestamp);
-  }, [filteredEntries, timeMode]);
+  }, [approvedEntries, timeMode]);
 
   const kpis = useMemo(() => {
-    const totalPlanned = filteredEntries.reduce((acc, curr) => acc + (curr.plannedQty || 0), 0);
-    const totalActual = filteredEntries.reduce((acc, curr) => acc + (curr.actualQty || 0), 0);
-    const totalRejected = filteredEntries.reduce((acc, curr) => acc + (curr.rejectedQty || 0), 0);
+    const totalPlanned = approvedEntries.reduce((acc, curr) => acc + (curr.plannedQty || 0), 0);
+    const totalActual = approvedEntries.reduce((acc, curr) => acc + (curr.actualQty || 0), 0);
+    const totalRejected = approvedEntries.reduce((acc, curr) => acc + (curr.rejectedQty || 0), 0);
     const achievement = totalPlanned > 0 ? (totalActual / totalPlanned) * 100 : 0;
     const yieldRate = totalActual > 0 ? ((totalActual - totalRejected) / totalActual) * 100 : 100;
     return { totalPlanned, totalActual, totalRejected, achievement, yieldRate };
-  }, [filteredEntries]);
+  }, [approvedEntries]);
 
   const handlePrint = () => {
     window.print();
@@ -79,9 +71,9 @@ const Reports: React.FC = () => {
 
   if (approvedEntries.length === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-12 bg-white border border-slate-200 rounded-lg shadow-sm">
+      <div className="flex-1 flex flex-col items-center justify-center p-12 bg-white m-4 border border-slate-200 rounded-lg shadow-sm">
         <h2 className="text-[14px] font-black text-slate-900 uppercase">Insufficient Validated Data</h2>
-        <p className="text-[11px] text-slate-500 mt-2">Reports require approved production logs.</p>
+        <p className="text-[11px] text-slate-500 mt-2">Approved production logs are required to generate MIS reports.</p>
       </div>
     );
   }
@@ -91,41 +83,39 @@ const Reports: React.FC = () => {
       <div className="fixed inset-0 z-[100] bg-slate-100 flex flex-col items-center overflow-auto p-4 md:p-8 print:p-0 print:bg-white">
         <div className="flex justify-between w-full max-w-[210mm] mb-6 print:hidden items-center">
           <button onClick={() => setShowPrintPreview(false)} className="flex items-center gap-2 text-slate-600 font-bold uppercase text-[10px]">Return</button>
-          <button onClick={handlePrint} className="bg-slate-900 text-white px-6 py-2 rounded-sm font-black text-[10px] uppercase shadow-lg">Download PDF (Print to PDF)</button>
+          <button onClick={handlePrint} className="bg-slate-900 text-white px-6 py-2 rounded-sm font-black text-[10px] uppercase shadow-lg">Download PDF</button>
         </div>
         <div className="bg-white w-full max-w-[210mm] min-h-[297mm] shadow-2xl p-[15mm] border border-slate-200 print:shadow-none print:border-none print:m-0 print:p-0">
           <div className="border-b-4 border-slate-900 pb-6 mb-8 flex justify-between items-end">
             <div>
               <h1 className="text-2xl font-black text-slate-900 uppercase leading-none mb-1">Ashok Leyland Limited</h1>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Master Audit Report • Factory MIS Node v2.4</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Enterprise MIS Report • Factory Node v2.4</p>
             </div>
             <div className="text-right">
-              <p className="text-[10px] font-black text-slate-900 uppercase">ID: {Math.random().toString(36).substring(7).toUpperCase()}</p>
+              <p className="text-[10px] font-black text-slate-900 uppercase">UID: {Math.random().toString(36).substring(7).toUpperCase()}</p>
               <p className="text-[10px] font-bold text-slate-500 uppercase">{new Date().toLocaleString()}</p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-10 mb-8">
             <div className="p-4 bg-slate-50 border border-slate-200 rounded">
-              <h3 className="text-[10px] font-black text-slate-900 uppercase mb-3 border-b border-slate-200 pb-1">Report Scope</h3>
+              <h3 className="text-[10px] font-black text-slate-900 uppercase mb-3 border-b border-slate-200 pb-1">Context</h3>
               <div className="space-y-2 text-[11px]">
-                <div className="flex justify-between"><span className="text-slate-500">Period:</span> <span className="font-bold">{timeMode}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Shift:</span> <span className="font-bold">{selectedShift}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Volume:</span> <span className="font-bold">{kpis.totalActual.toLocaleString()} Units</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">Periodicity:</span> <span className="font-bold">{timeMode}</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">Gross Output:</span> <span className="font-bold">{kpis.totalActual.toLocaleString()} Units</span></div>
               </div>
             </div>
             <div className="p-4 bg-slate-50 border border-slate-200 rounded">
-              <h3 className="text-[10px] font-black text-slate-900 uppercase mb-3 border-b border-slate-200 pb-1">Primary Metrics</h3>
+              <h3 className="text-[10px] font-black text-slate-900 uppercase mb-3 border-b border-slate-200 pb-1">KPI Audit</h3>
               <div className="space-y-2 text-[11px]">
-                <div className="flex justify-between"><span className="text-slate-500">Target Achieved:</span> <span className="font-bold">{kpis.achievement.toFixed(2)}%</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Quality Yield:</span> <span className="font-bold text-emerald-700">{kpis.yieldRate.toFixed(2)}%</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Material Loss:</span> <span className="font-bold text-red-600">{kpis.totalRejected} Units</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">Efficiency:</span> <span className="font-bold">{kpis.achievement.toFixed(2)}%</span></div>
+                <div className="flex justify-between"><span className="text-slate-500">Quality:</span> <span className="font-bold text-emerald-700">{kpis.yieldRate.toFixed(2)}%</span></div>
               </div>
             </div>
           </div>
           <div className="mb-12">
             <h3 className="text-[11px] font-black text-slate-900 uppercase mb-4 border-l-4 border-slate-900 pl-3">Performance Trends</h3>
-            <div className="h-[280px] w-full border border-slate-100 p-2 rounded relative">
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+            <div className="h-[300px] w-full border border-slate-100 p-2 rounded relative bg-white">
+              <ResponsiveContainer width="100%" height="100%" debounce={50}>
                 <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                   <XAxis dataKey="label" tick={{ fontSize: 9, fontWeight: 800, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} />
@@ -136,38 +126,13 @@ const Reports: React.FC = () => {
               </ResponsiveContainer>
             </div>
           </div>
-          <div className="print:mt-10">
-            <h3 className="text-[11px] font-black text-slate-900 uppercase mb-4 border-l-4 border-slate-900 pl-3">Audit Log Registry</h3>
-            <table className="w-full text-left border-collapse table-auto">
-              <thead>
-                <tr className="bg-slate-900 text-white text-[9px] font-black uppercase">
-                  <th className="p-2 border border-slate-900">Date Index</th>
-                  <th className="p-2 border border-slate-900">Area/Shop</th>
-                  <th className="p-2 border border-slate-900">Equipment</th>
-                  <th className="p-2 border border-slate-900 text-right">Actual</th>
-                  <th className="p-2 border border-slate-900 text-right">Loss</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredEntries.map((entry, idx) => (
-                  <tr key={entry.id} className={`text-[10px] break-inside-avoid ${idx % 2 === 0 ? 'bg-slate-50' : 'bg-white'}`}>
-                    <td className="p-2 border border-slate-200 font-bold">{entry.date}</td>
-                    <td className="p-2 border border-slate-200 uppercase">{entry.shop}</td>
-                    <td className="p-2 border border-slate-200 font-black">{entry.machine}</td>
-                    <td className="p-2 border border-slate-200 text-right font-black">{entry.actualQty}</td>
-                    <td className="p-2 border border-slate-200 text-right font-bold text-red-600">{entry.rejectedQty}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col space-y-4 w-full overflow-hidden p-2">
+    <div className="flex-1 flex flex-col space-y-4 w-full p-2 overflow-hidden">
       <div className="flex flex-col lg:flex-row justify-between items-center bg-white p-4 border border-slate-200 rounded-xl shadow-sm gap-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-slate-900 rounded flex items-center justify-center text-white">
@@ -202,10 +167,10 @@ const Reports: React.FC = () => {
           <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-tighter">Waste Index: {((kpis.totalRejected / kpis.totalActual) * 100 || 0).toFixed(1)}%</p>
         </div>
       </div>
-      <div className="bg-white p-6 border border-slate-200 rounded-2xl shadow-sm flex-1 relative min-h-[300px]">
+      <div className="bg-white p-6 border border-slate-200 rounded-2xl shadow-sm flex-1 relative min-h-[450px]">
         <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-6 border-b pb-2">Production Variance Trend</h3>
-        <div className="h-[300px] w-full relative">
-          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+        <div className="h-[350px] w-full relative">
+          <ResponsiveContainer width="100%" height="100%" debounce={50}>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
               <XAxis dataKey="label" tick={{ fontSize: 10, fontWeight: 800, fill: '#64748b' }} axisLine={{ stroke: '#e2e8f0' }} />
